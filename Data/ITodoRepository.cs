@@ -7,6 +7,7 @@ public interface ITodoRepository
     List<TodoItem> GetAll();
     TodoItem? GetById(int id);
     void Add(string title);
+    TodoItem? Update(int id, string title);
     TodoItem? Delete(int id);
     TodoItem? Toggle(int id);
 }
