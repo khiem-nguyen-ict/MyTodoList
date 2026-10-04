@@ -29,6 +29,19 @@ public class TodoRepository : ITodoRepository
         _db.SaveChanges();
     }
 
+    public TodoItem? Update(int id, string title)
+    {
+        var item = _db.TodoItems.Find(id);
+        if (item is null)
+        {
+            return null;
+        }
+
+        item.Title = title;
+        _db.SaveChanges();
+        return item;
+    }
+
     public TodoItem? Delete(int id)
     {
         var item = _db.TodoItems.Find(id);

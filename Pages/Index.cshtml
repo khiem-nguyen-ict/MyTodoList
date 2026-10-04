@@ -46,6 +46,7 @@
                                    @(task.IsDone ? "checked" : "") />
                         </form>
                         <span class="flex-grow-1 @(task.IsDone ? "text-decoration-line-through text-muted" : "")">@task.Title</span>
+                        <a asp-page="/Edit" asp-route-id="@task.Id" class="btn btn-sm btn-outline-primary me-1">Edit</a>
                         <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
                         </form>
