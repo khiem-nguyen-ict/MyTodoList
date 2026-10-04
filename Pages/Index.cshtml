@@ -29,14 +29,14 @@
         </form>
         <span asp-validation-for="TaskName" class="text-danger d-block mb-4"></span>
 
-        @if (IndexModel.TodoList.Count == 0)
+        @if (Model.TodoList.Count == 0)
         {
             <p class="text-center text-muted">No tasks yet. Add one above to get started.</p>
         }
         else
         {
             <ul class="list-group" aria-label="To-do list">
-                @foreach (var task in IndexModel.TodoList)
+                @foreach (var task in Model.TodoList)
                 {
                     <li class="list-group-item d-flex align-items-center">
                         <form method="post" asp-page-handler="Toggle" asp-route-id="@task.Id">

@@ -1,62 +1,64 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MyTodoList.Data;
 using MyTodoList.Models;
 
 namespace MyTodoList.Pages;
 
 public class IndexModel : PageModel
 {
-  // Page model instances are created per request, so the list is static
-  // to survive across requests (in-memory only; resets on app restart).
-  private static int _nextId = 3;
+    private readonly ITodoRepository _todos;
 
-  public static List<TodoItem> TodoList { get; set; } = new()
-  {
-    new TodoItem { Id = 1, Title = "Practice for the interview" },
-    new TodoItem { Id = 2, Title = "Do exercises" }
-  };
+    // Loaded per request from the repository (backed by SQLite, not a static field)
+    public List<TodoItem> TodoList { get; private set; } = new();
 
-  [BindProperty]
-  [Required(ErrorMessage = "Please enter a task.")]
-  [StringLength(100, ErrorMessage = "Tasks can't be longer than 100 characters.")]
-  public string TaskName { get; set; } = string.Empty;
+    [BindProperty]
+    [Required(ErrorMessage = "Please enter a task.")]
+    [StringLength(100, ErrorMessage = "Tasks can't be longer than 100 characters.")]
+    public string TaskName { get; set; } = string.Empty;
 
-  public void OnGet()
-  {
-  }
-
-  public IActionResult OnPost()
-  {
-    // Validation runs during model binding, BEFORE this method executes.
-    if (!ModelState.IsValid)
+    // Constructor injection: DI provides the repository (and its DbContext)
+    public IndexModel(ITodoRepository todos)
     {
-      return Page(); // re-render the form WITH validation errors
+        _todos = todos;
     }
 
-    TodoList.Add(new TodoItem { Id = _nextId++, Title = TaskName.Trim() });
-    TempData["Message"] = $"Added: {TaskName.Trim()}";
-    return RedirectToPage();
-  }
-
-  public IActionResult OnPostDelete(int id)
-  {
-    var item = TodoList.FirstOrDefault(t => t.Id == id);
-    if (item is not null)
+    public void OnGet()
     {
-      TodoList.Remove(item);
-      TempData["Message"] = $"Deleted: {item.Title}";
+        TodoList = _todos.GetAll();
     }
-    return RedirectToPage();
-  }
 
-  public IActionResult OnPostToggle(int id)
-  {
-    var item = TodoList.FirstOrDefault(t => t.Id == id);
-    if (item is not null)
+    public IActionResult OnPost()
     {
-      item.IsDone = !item.IsDone;
+        // Validation runs during model binding, BEFORE this method executes.
+        if (!ModelState.IsValid)
+        {
+            return Page(); // re-render the form WITH validation errors
+        }
+
+        _todos.Add(TaskName.Trim());
+        TempData["Message"] = $"Added: {TaskName.Trim()}";
+        return RedirectToPage();
     }
-    return RedirectToPage();
-  }
+
+    public IActionResult OnPostDelete(int id)
+    {
+        var item = _todos.Delete(id);
+        if (item is not null)
+        {
+            TempData["Message"] = $"Deleted: {item.Title}";
+        }
+        return RedirectToPage();
+    }
+
+    public IActionResult OnPostToggle(int id)
+    {
+        var item = _todos.Toggle(id);
+        if (item is not null)
+        {
+            TempData["Message"] = $"Task \"{item.Title}\" marked {(item.IsDone ? "done" : "not done")}.";
+        }
+        return RedirectToPage();
+    }
 }
