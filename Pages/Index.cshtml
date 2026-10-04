@@ -1,0 +1,57 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<div class="text-center">
+    <h1 class="display-4">Task Management</h1>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8 col-lg-6">
+        @if (TempData["Message"] is string message)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @message
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <form method="post" class="input-group">
+            <label asp-for="TaskName" class="visually-hidden">New task</label>
+            <input asp-for="TaskName" class="form-control" placeholder="What needs to be done?" autocomplete="off" />
+            <button type="submit" class="btn btn-primary">Add task</button>
+        </form>
+        <span asp-validation-for="TaskName" class="text-danger d-block mb-4"></span>
+
+        @if (IndexModel.TodoList.Count == 0)
+        {
+            <p class="text-center text-muted">No tasks yet. Add one above to get started.</p>
+        }
+        else
+        {
+            <ul class="list-group" aria-label="To-do list">
+                @foreach (var task in IndexModel.TodoList)
+                {
+                    <li class="list-group-item d-flex align-items-center">
+                        <form method="post" asp-page-handler="Toggle" asp-route-id="@task.Id">
+                            <input class="form-check-input me-3 mt-0" type="checkbox"
+                                   aria-label="Mark @task.Title as complete"
+                                   onchange="this.form.submit()"
+                                   @(task.IsDone ? "checked" : "") />
+                        </form>
+                        <span class="flex-grow-1 @(task.IsDone ? "text-decoration-line-through text-muted" : "")">@task.Title</span>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@task.Id">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
