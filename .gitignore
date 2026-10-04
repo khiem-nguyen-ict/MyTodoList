@@ -34,3 +34,7 @@ coverage*.json
 # OS
 .DS_Store
 Thumbs.db
+
+# SQLite database files (created at runtime)
+todolist.db
+todolist.db-*
